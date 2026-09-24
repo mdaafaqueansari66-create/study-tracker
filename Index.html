@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#111111">
+  <link rel="manifest" href="manifest.json">
+
+  <title>Study Tracker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+
+    .app {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .input {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      padding: 10px 15px;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+    }
+
+    .progress {
+      margin: 20px 0;
+    }
+
+    .bar {
+      height: 12px;
+      background: #ddd;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    #fill {
+      height: 100%;
+      width: 0%;
+      background: #111;
+      transition: 0.3s;
+    }
+
+    li {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #eee;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    ul {
+      padding: 0;
+    }
+
+    .done {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    .delete {
+      background: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <h1>📚 Study Tracker</h1>
+
+  <div class="input">
+    <input
+      id="taskInput"
+      type="text"
+      placeholder="Enter lecture/task..."
+    >
+
+    <button onclick="addTask()">Add</button>
+  </div>
+
+  <div class="progress">
+    <b>Progress: <span id="percent">0%</span></b>
+
+    <div class="bar">
+      <div id="fill"></div>
+    </div>
+  </div>
+
+  <ul id="taskList"></ul>
+
+</div>
+
+<script>
+
+let tasks =
+  JSON.parse(localStorage.getItem("tasks")) || [];
+
+
+function save() {
+  localStorage.setItem(
+    "tasks",
+    JSON.stringify(tasks)
+  );
+}
+
+
+function addTask() {
+
+  const input =
+    document.getElementById("taskInput");
+
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  tasks.push({
+    text: text,
+    done: false
+  });
+
+  input.value = "";
+
+  save();
+  display();
+}
+
+
+function toggle(index) {
+
+  tasks[index].done =
+    !tasks[index].done;
+
+  save();
+  display();
+}
+
+
+function removeTask(index) {
+
+  tasks.splice(index, 1);
+
+  save();
+  display();
+}
+
+
+function display() {
+
+  const list =
+    document.getElementById("taskList");
+
+  list.innerHTML = "";
+
+  tasks.forEach((task, index) => {
+
+    const li =
+      document.createElement("li");
+
+    li.innerHTML = `
+
+      <span class="${task.done ? "done" : ""}">
+        <input
+          type="checkbox"
+          ${task.done ? "checked" : ""}
+          onchange="toggle(${index})"
+        >
+        ${task.text}
+      </span>
+
+      <button
+        class="delete"
+        onclick="removeTask(${index})"
+      >
+        Delete
+      </button>
+
+    `;
+
+    list.appendChild(li);
+
+  });
+
+  updateProgress();
+}
+
+
+function updateProgress() {
+
+  const total = tasks.length;
+
+  const completed =
+    tasks.filter(t => t.done).length;
+
+  const percentage =
+    total === 0
+      ? 0
+      : Math.round((completed / total) * 100);
+
+  document.getElementById("percent")
+    .textContent = percentage + "%";
+
+  document.getElementById("fill")
+    .style.width = percentage + "%";
+}
+
+
+display();
+
+
+// PWA Service Worker
+if ("serviceWorker" in navigator) {
+
+  navigator.serviceWorker.register("sw.js")
+    .then(() => {
+      console.log("PWA ready!");
+    })
+    .catch(error => {
+      console.log("PWA error:", error);
+    });
+
+}
+
+</script>
+
+</body>
+</html>

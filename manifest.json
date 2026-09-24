@@ -1,0 +1,10 @@
+{
+  "name": "Study Tracker",
+  "short_name": "Study",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f2f2",
+  "theme_color": "#111111",
+  "description": "A simple personal study tracker",
+  "icons": []
+}
